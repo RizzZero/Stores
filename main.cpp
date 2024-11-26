@@ -14,8 +14,8 @@
 #include <sys/stat.h>
 #define PARTSCSV "Parts.csv"
 #define MAX 10000
-#define NAME 0
-#define COUNT 1
+#define READ 0
+#define WRITE 1
 #define PRICE 2
 #define STATE 3
 using namespace std;
@@ -136,23 +136,28 @@ int create_process(int& write_pipe, int& read_pipe, string executable)
     }
     return pid;
 }
-void create_buildings_process(const vector<string>& folders, string resources,vector <int>& child_pids)
+string store_data(string store, string product,int id)
 {
-    for (int i = 0; i < folders.size(); i++)
+    store = store + "-" + product + "-" + to_string(id);
+    return store;
+}
+void create_buildings_process(const vector<string>& stores, string product,vector <int>& child_pids)
+{
+    for (int i = 0; i < stores.size(); i++)
     {
         int write_pipe;
         int read_pipe;
-        int pid = create_process(write_pipe,read_pipe,stores);
-        string data = building_data(folders[i],resources,i);
+        int pid = create_process(write_pipe,read_pipe,"./stores.out");
+        string data = store_data(stores[i],product,i);
         write(write_pipe, data.c_str(), data.length());
-        cout << "Building data sent!" << endl;
+        cout << "store data sent" << endl;
         fflush(stdout);
         child_pids.push_back(pid);
         close(write_pipe);
         char buf[10240];
         read(read_pipe, buf, 10240);
-        cout << "Result sent to main!" << endl;
-        cout << "\033[0m"; // Set color to default
+        cout << "Results sent to main!" << endl;
+        cout << "\033[0m";
         fflush(stdout);
         close(read_pipe);
         printf("%s\n",buf);
